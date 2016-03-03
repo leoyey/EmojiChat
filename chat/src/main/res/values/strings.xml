@@ -3,4 +3,6 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="send">发送</string>
+    <string name="error.empty">请输入信息</string>
 </resources>

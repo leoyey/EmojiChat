@@ -15,15 +15,17 @@
 
         <Button
             android:id="@+id/toolbox_btn_send"
-            android:layout_width="wrap_content"
+            android:layout_width="50dp"
             android:layout_height="35dp"
             android:layout_alignParentRight="true"
             android:layout_gravity="bottom"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="2dp"
-            android:text="发送"
-            android:textColor="#ffffffff"
-            android:textSize="15sp"/>
+            android:text="@string/send"
+            android:textColor="#ababab"
+            android:textSize="18sp"
+            android:background="@null"
+            />
 
 
         <CheckBox
@@ -45,7 +47,7 @@
             android:background="@drawable/selector_chat_more"
             android:button="@null"/>
 
-        <com.rockerhieu.emojicon.EmojiconEditText
+        <org.kymjs.chat.widget.CoreEmojiconEditText
             android:id="@+id/toolbox_et_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -56,7 +58,9 @@
             android:maxHeight="60dp"
             android:minHeight="35dp"
             android:singleLine="false"
-            android:textSize="18sp"/>
+            android:textSize="18sp"
+            android:imeOptions="actionSend"
+            />
 
     </RelativeLayout>
 

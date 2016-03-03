@@ -35,4 +35,6 @@ public interface OnOperationListener {
     void selectedBackSpace(Emojicon back);
 
     void selectedFunction(int index);
+
+    void onKeyboardShow();
 }

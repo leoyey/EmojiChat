@@ -19,7 +19,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -51,6 +53,7 @@ public class ChatActivity extends KJActivity {
 
     private KJChatKeyboard box;
     private ListView mRealListView;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     List<Message> datas = new ArrayList<Message>();
     private ChatAdapter adapter;
@@ -73,6 +76,17 @@ public class ChatActivity extends KJActivity {
 
     private void initMessageInputToolBox() {
         box.setOnOperationListener(new OnOperationListener() {
+            @Override
+            public void onKeyboardShow() {
+                mRealListView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Select the last row so it will scroll into view...
+                        mRealListView.setSelection(adapter.getCount() - 1);
+                    }
+                });
+            }
+
             @Override
             public void send(String content) {
                 Message message = new Message(Message.MSG_TYPE_TEXT, Message.MSG_STATE_SUCCESS,
@@ -136,16 +150,16 @@ public class ChatActivity extends KJActivity {
         byte[] emoji = new byte[]{
                 (byte) 0xF0, (byte) 0x9F, (byte) 0x98, (byte) 0x81
         };
-        Message message = new Message(Message.MSG_TYPE_TEXT,
-                Message.MSG_STATE_SUCCESS, "\ue415", "avatar", "Jerry", "avatar",
+        final Message message = new Message(Message.MSG_TYPE_TEXT,
+                Message.MSG_STATE_SUCCESS, "\ue415", "", "Jerry", "",
                 new String(emoji), false, true, new Date(System.currentTimeMillis()
                 - (1000 * 60 * 60 * 24) * 8));
         Message message1 = new Message(Message.MSG_TYPE_TEXT,
-                Message.MSG_STATE_SUCCESS, "Tom", "avatar", "Jerry", "avatar",
+                Message.MSG_STATE_SUCCESS, "Tom", "", "Jerry", "",
                 "以后的版本支持链接高亮喔:http://www.kymjs.com支持http、https、svn、ftp开头的链接",
                 true, true, new Date(System.currentTimeMillis() - (1000 * 60 * 60 * 24) * 8));
         Message message2 = new Message(Message.MSG_TYPE_PHOTO,
-                Message.MSG_STATE_SUCCESS, "Tom", "avatar", "Jerry", "avatar",
+                Message.MSG_STATE_SUCCESS, "Tom", "", "Jerry", "",
                 "http://static.oschina.net/uploads/space/2015/0611/103706_rpPc_1157342.png",
                 false, true, new Date(
                 System.currentTimeMillis() - (1000 * 60 * 60 * 24) * 7));
@@ -163,6 +177,38 @@ public class ChatActivity extends KJActivity {
         datas.add(message2);
         datas.add(message6);
         datas.add(message7);
+        datas.addAll(datas);
+        swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_container);
+        //设置刷新时动画的颜色，可以设置4个
+        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_light, android.R.color.holo_red_light, android.R.color.holo_orange_light, android.R.color.holo_green_light);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+            @Override
+            public void onRefresh() {
+                for (int i = 0; i < 10; ++i) {
+                    Message message1 = new Message(Message.MSG_TYPE_TEXT,
+                            Message.MSG_STATE_SUCCESS, "Tom", "avatar", "Jerry", "avatar",
+                            "以后的版本支持链接高亮喔:http://www.kymjs.com支持http、https、svn、ftp开头的链接(" + i + ")",
+                            true, true, new Date(System.currentTimeMillis() - (1000 * 60 * 60 * 24) * 8));
+                    datas.add(0, message1);
+                }
+                mRealListView.setStackFromBottom(false);
+                mRealListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        swipeRefreshLayout.setRefreshing(false);
+                        adapter.notifyDataSetChanged();
+                    }
+                }, 2000);
+            }
+        });
+
+        //        datas.addAll(datas);
+//        datas.addAll(datas);
+//        datas.addAll(datas);
+//        datas.addAll(datas);
 
         adapter = new ChatAdapter(this, datas, getOnChatItemClickListener());
         mRealListView.setAdapter(adapter);

@@ -31,7 +31,9 @@ import org.kymjs.chat.bean.Message;
 import org.kymjs.kjframe.KJBitmap;
 import org.kymjs.kjframe.utils.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -87,6 +89,10 @@ public class ChatAdapter extends BaseAdapter {
         return 2;
     }
 
+    public static String getDataTime(String format, Date date) {
+        SimpleDateFormat df = new SimpleDateFormat(format);
+        return df.format(date);
+    }
     @Override
     public View getView(final int position, View v, ViewGroup parent) {
         final ViewHolder holder;
@@ -110,8 +116,9 @@ public class ChatAdapter extends BaseAdapter {
             holder = (ViewHolder) v.getTag();
         }
 
-        holder.tv_date.setText(StringUtils.friendlyTime(StringUtils.getDataTime("yyyy-MM-dd " +
-                "HH:mm:ss")));
+        holder.tv_date.setText(StringUtils.friendlyTime(getDataTime("yyyy-MM-dd HH:mm:ss", data.getTime())));
+//        holder.tv_date.setText(StringUtils.getDataTime("yyyy-MM-dd " +
+//                "HH:mm:ss"));
         holder.tv_date.setVisibility(View.VISIBLE);
 
         //如果是文本类型，则隐藏图片，如果是图片则隐藏文本
@@ -150,10 +157,16 @@ public class ChatAdapter extends BaseAdapter {
         }
 
         //显示头像
+        String avatarUrl;
         if (data.getIsSend()) {
-            kjb.display(holder.img_avatar, data.getFromUserAvatar());
+            avatarUrl = data.getFromUserAvatar();
+//            kjb.display(holder.img_avatar, data.getFromUserAvatar());
         } else {
-            kjb.display(holder.img_avatar, data.getToUserAvatar());
+            avatarUrl = data.getToUserAvatar();
+//            kjb.display(holder.img_avatar, data.getToUserAvatar());
+        }
+        if (avatarUrl != null && avatarUrl.length() > 0) {
+            kjb.display(holder.img_avatar, avatarUrl);
         }
 
         if (listener != null) {

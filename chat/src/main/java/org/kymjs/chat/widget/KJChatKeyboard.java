@@ -18,14 +18,21 @@ package org.kymjs.chat.widget;
 import android.app.Activity;
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.kymjs.chat.OnOperationListener;
 import org.kymjs.chat.R;
@@ -119,14 +126,11 @@ public class KJChatKeyboard extends RelativeLayout implements
         mFaceTabs = (PagerSlidingTabStrip) findViewById(R.id.toolbox_tabs);
         adapter = new FaceCategroyAdapter(((FragmentActivity) getContext())
                 .getSupportFragmentManager(), LAYOUT_TYPE_FACE);
+        enableOrDisableSendButton(false);
         mBtnSend.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (listener != null) {
-                    String content = mEtMsg.getText().toString();
-                    listener.send(content);
-                    mEtMsg.setText(null);
-                }
+                sendMessage(mEtMsg.getText().toString());
             }
         });
         // 点击表情按钮
@@ -137,14 +141,50 @@ public class KJChatKeyboard extends RelativeLayout implements
         mEtMsg.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (listener != null) {
+                    listener.onKeyboardShow();
+                }
                 hideLayout();
+            }
+        });
+        mEtMsg.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
+                    sendMessage(mEtMsg.getText().toString());
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+        mEtMsg.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s == null || s.length() == 0) {
+                    enableOrDisableSendButton(false);
+                } else {
+//                    char endChar = s.charAt(s.length() - 1);
+//                    if (endChar == '\n') {
+//                        sendMessage(s.subSequence(0, s.length() - 1).toString());
+//                    } else {
+                        enableOrDisableSendButton(true);
+//                    }
+                }
             }
         });
     }
 
-    /*************************
-     * 内部方法 start
-     ************************/
+                /*************************
+                 * 内部方法 start
+                 ************************/
 
     private OnClickListener getFunctionBtnListener(final int which) {
         return new OnClickListener() {
@@ -169,6 +209,26 @@ public class KJChatKeyboard extends RelativeLayout implements
         adapter.setOnOperationListener(listener);
         layoutType = mode;
         setFaceData(mFaceData);
+    }
+
+    private void enableOrDisableSendButton(boolean isEnable) {
+        mBtnSend.setEnabled(isEnable);
+        if (isEnable) {
+            mBtnSend.setTextColor(ContextCompat.getColor(context, R.color.send_enable));
+        } else {
+            mBtnSend.setTextColor(ContextCompat.getColor(context, R.color.send_disable));
+        }
+    }
+
+    private void sendMessage(String content) {
+        if (content.length() > 0) {
+            if (listener != null) {
+                listener.send(content);
+            }
+        } else {
+            Toast.makeText(context, R.string.error_empty, Toast.LENGTH_SHORT).show();
+        }
+        mEtMsg.setText(null);
     }
 
     @Override
